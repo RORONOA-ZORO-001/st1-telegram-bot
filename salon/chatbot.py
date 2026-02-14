@@ -1,20 +1,34 @@
-from .styles import list_styles, match_style
-from .bookings import book_session
+from salon.styles import list_styles, match_style
+from salon.bookings import book_session
+
 
 import logging
-
+import os
 # Telegram bot integration
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
-TOKEN = "8541064425:AAF9xptXqFgAK-10x6de09a9Z74Y6IsyRWk"  # Replace with your bot token
-STYLIST_CHAT_ID = "5516325616"  # Replace with your stylist's Telegram chat ID
+TOKEN = os.getenv("BOT_TOKEN")
+STYLIST_CHAT_ID = os.getenv("STYLIST_CHAT_ID")
+if not TOKEN:
+    raise ValueError("BOT_TOKEN environment variable not set")
+if not STYLIST_CHAT_ID:
+    raise ValueError("STYLIST_CHAT_ID environment variable not set")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Welcome to SalonBot! Ask about styles, prices, or book a session.")
+    if not update.message:
+        return
+    await update.message.reply_text(
+        "Welcome to SalonBot! Ask about styles, prices, or book a session."
+    )
+
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
+
     text = update.message.text
+
     booking_step = context.user_data.get('booking_step')
 
     if not booking_step:
